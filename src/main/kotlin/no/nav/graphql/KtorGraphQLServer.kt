@@ -4,37 +4,37 @@ import com.expediagroup.graphql.generator.SchemaGeneratorConfig
 import com.expediagroup.graphql.generator.TopLevelObject
 import com.expediagroup.graphql.generator.execution.GraphQLContext
 import com.expediagroup.graphql.generator.toSchema
-import com.expediagroup.graphql.server.execution.GraphQLContextFactory
-import com.expediagroup.graphql.server.execution.GraphQLRequestHandler
-import com.expediagroup.graphql.server.execution.GraphQLRequestParser
-import com.expediagroup.graphql.server.execution.GraphQLServer
+import com.expediagroup.graphql.server.execution.*
+import com.expediagroup.graphql.server.operations.Mutation
+import com.expediagroup.graphql.server.operations.Query
 import com.expediagroup.graphql.server.types.GraphQLServerRequest
 import graphql.GraphQL
 import io.ktor.request.*
+import java.util.*
 
 class KtorGraphQLServer(
     requestParser: KtorGraphQLRequestParser,
     contextFactory: KtorGraphQLContextFactory,
-    requestHandler: GraphQLRequestHandler
+    requestHandler: GraphQLRequestHandler,
 ) : GraphQLServer<ApplicationRequest>(requestParser, contextFactory, requestHandler)
 
 fun ktorGraphQLServer(): KtorGraphQLServer {
+    val queries = ServiceLoader.load(Query::class.java)
+    val mutations = ServiceLoader.load(Mutation::class.java)
     val schemaGeneratorConfig = SchemaGeneratorConfig(supportedPackages = listOf("no.nav.graphql"))
     val schema = toSchema(
         schemaGeneratorConfig,
-        queries = listOf(
-            TopLevelObject(ProductsQuery())
-        ),
-        mutations = listOf(
-            TopLevelObject(ProductsMutation())
-        )
-
+        queries = queries.map { TopLevelObject(it) },
+        mutations = mutations.map { TopLevelObject(it) }
     )
     val graphQL = GraphQL.newGraphQL(schema).build()
+    val dataLoaderRegistryFactory = DefaultDataLoaderRegistryFactory(listOf(
+        TechnicalDataDataLoader,
+    ))
     return KtorGraphQLServer(
         KtorGraphQLRequestParser,
         KtorGraphQLContextFactory,
-        GraphQLRequestHandler(graphQL)
+        GraphQLRequestHandler(graphQL, dataLoaderRegistryFactory)
     )
 }
 

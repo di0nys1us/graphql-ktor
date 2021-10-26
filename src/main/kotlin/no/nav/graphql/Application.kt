@@ -23,6 +23,6 @@ fun Application.module() {
 
     transaction {
         addLogger(Slf4jSqlDebugLogger)
-        SchemaUtils.create(Products)
+        SchemaUtils.create(ProductTable, TechnicalDataTable)
     }
 }

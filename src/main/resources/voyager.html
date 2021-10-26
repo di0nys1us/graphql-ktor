@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <script src="//cdn.jsdelivr.net/npm/react@17/umd/react.production.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/react-dom@17/umd/react-dom.production.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/graphql-voyager/dist/voyager.min.js"></script>
+    <title>GraphQL Voyager</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/graphql-voyager/dist/voyager.css" />
+</head>
+<body>
+<div id="voyager">Loading...</div>
+<script>
+    GraphQLVoyager.init(document.getElementById('voyager'), {
+        async introspection(query) {
+            const response = await fetch("/graphql", {
+                method: "post",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query })
+            })
+            return response.json()
+        },
+    });
+</script>
+</body>
+</html>

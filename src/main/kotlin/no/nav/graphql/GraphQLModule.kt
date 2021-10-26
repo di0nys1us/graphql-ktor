@@ -27,6 +27,12 @@ fun Route.graphqlPlayground(playgroundHtml: String) {
     }
 }
 
+fun Route.graphqlVoyager(voyagerHtml: String) {
+    get("/voyager") {
+        call.respondText(voyagerHtml, ContentType.Text.Html)
+    }
+}
+
 fun Application.graphQLModule() {
     install(Routing)
     install(ContentNegotiation) {
@@ -35,9 +41,11 @@ fun Application.graphQLModule() {
 
     val server = ktorGraphQLServer()
     val playgroundHtml = javaClass.getResource("/playground.html")!!.readText()
+    val voyagerHtml = javaClass.getResource("/voyager.html")!!.readText()
 
     routing {
         graphql(server)
         graphqlPlayground(playgroundHtml)
+        graphqlVoyager(voyagerHtml)
     }
 }

@@ -25,6 +25,7 @@ dependencies {
     implementation("io.ktor:ktor-jackson:$ktor_version")
     implementation("ch.qos.logback:logback-classic:$logback_version")
     implementation("com.expediagroup:graphql-kotlin-server:$graphql_kotlin_server_version")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.5.2")
     implementation("com.zaxxer:HikariCP:5.0.0")
     implementation("org.postgresql:postgresql:42.3.0")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposed_version")
