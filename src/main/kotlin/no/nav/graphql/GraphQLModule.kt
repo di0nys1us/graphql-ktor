@@ -9,6 +9,18 @@ import io.ktor.jackson.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import java.io.File
+
+suspend fun ApplicationCall.respondResource(name: String) {
+    when (val resource = javaClass.getResource(name)) {
+        null -> {
+            respond(HttpStatusCode.NotFound, "$name not found")
+        }
+        else -> {
+            respondFile(File(resource.toURI()))
+        }
+    }
+}
 
 fun Route.graphql(server: GraphQLServer<ApplicationRequest>) {
     post("/graphql") {
@@ -16,20 +28,20 @@ fun Route.graphql(server: GraphQLServer<ApplicationRequest>) {
             is GraphQLResponse<*> -> {
                 call.respond(response)
             }
-            else -> call.response.status(HttpStatusCode.NotImplemented)
+            else -> call.respond(HttpStatusCode.NotImplemented, "GraphQLBatchResponse not implemented")
         }
     }
 }
 
-fun Route.graphqlPlayground(playgroundHtml: String) {
+fun Route.graphqlPlayground() {
     get("/graphql") {
-        call.respondText(playgroundHtml, ContentType.Text.Html)
+        call.respondResource("/playground.html")
     }
 }
 
-fun Route.graphqlVoyager(voyagerHtml: String) {
+fun Route.graphqlVoyager() {
     get("/voyager") {
-        call.respondText(voyagerHtml, ContentType.Text.Html)
+        call.respondResource("/voyager.html")
     }
 }
 
@@ -40,12 +52,10 @@ fun Application.graphQLModule() {
     }
 
     val server = ktorGraphQLServer()
-    val playgroundHtml = javaClass.getResource("/playground.html")!!.readText()
-    val voyagerHtml = javaClass.getResource("/voyager.html")!!.readText()
 
     routing {
         graphql(server)
-        graphqlPlayground(playgroundHtml)
-        graphqlVoyager(voyagerHtml)
+        graphqlPlayground()
+        graphqlVoyager()
     }
 }
